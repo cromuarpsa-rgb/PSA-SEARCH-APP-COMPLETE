@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>PSA Search System</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#0b3d91" />
+    <link rel="icon" href="logo/icon-192.png" />
+    <link rel="apple-touch-icon" href="logo/icon-192.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="PSA Search" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="login-screen" id="loginScreen">
+      <div class="login-panel">
+        <img class="login-logo" src="logo/PSA-logo-1536x1536.webp" alt="PSA logo" />
+        <div class="login-copy">
+          <p class="eyebrow">Philippine Statistics Authority</p>
+          <h1>PSA Search System</h1>
+          <p class="subtitle">Sign in to search PSOC and PSIC workbook records.</p>
+        </div>
+        <form id="loginForm" class="login-form" autocomplete="off">
+          <label>
+            Username
+            <input id="username" name="username" type="text" autocomplete="username" required />
+          </label>
+          <label>
+            Password
+            <input id="password" name="password" type="password" autocomplete="current-password" required />
+          </label>
+          <button type="submit">Sign in</button>
+          <p class="hint">Enter your login credentials to continue.</p>
+          <p class="error" id="loginError"></p>
+        </form>
+      </div>
+    </div>
+
+    <div id="appShell" class="app-shell hidden">
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+          <img class="sidebar-logo" src="logo/PSA-logo-1536x1536.webp" alt="PSA logo" />
+          <div>
+            <p class="eyebrow">Philippine Statistics Authority</p>
+            <h1>PSA Search</h1>
+          </div>
+          <button class="sidebar-close" id="sidebarClose" type="button" aria-label="Close menu">×</button>
+        </div>
+
+        <nav class="sidebar-nav">
+          <div class="sidebar-section">
+            <p class="sidebar-label">Search</p>
+            <label class="search-box">
+              <span>🔎</span>
+              <input id="searchInput" type="search" placeholder="Type keywords to filter records" autocomplete="off" />
+            </label>
+            <button id="clearButton" type="button" class="sidebar-menu-item ghost">Clear filters</button>
+            <button id="qrScanButton" type="button" class="sidebar-menu-item ghost">📷 Scan QR code</button>
+          </div>
+
+          <div class="sidebar-section">
+            <p class="sidebar-label">Sheets</p>
+            <div class="sheet-nav" id="sheetNav"></div>
+          </div>
+
+          <div class="sidebar-section admin-section hidden" id="adminSection">
+            <p class="sidebar-label">Admin</p>
+            <button id="adminAddUser" type="button" class="sidebar-menu-item">＋ Create user</button>
+          </div>
+
+          <div class="sidebar-section">
+            <p class="sidebar-label">Appearance</p>
+            <button id="themeToggle" type="button" class="sidebar-menu-item ghost">
+              <span id="themeToggleIcon">🌙</span>
+              <span id="themeToggleLabel">Dark mode</span>
+            </button>
+            <div class="zoom-controls" role="group" aria-label="Page zoom">
+              <button id="zoomOutButton" type="button" class="zoom-button" aria-label="Zoom out">−</button>
+              <span id="zoomLevelLabel" class="zoom-level">100%</span>
+              <button id="zoomInButton" type="button" class="zoom-button" aria-label="Zoom in">+</button>
+              <button id="zoomResetButton" type="button" class="zoom-reset" aria-label="Reset zoom" title="Reset zoom">Reset</button>
+            </div>
+          </div>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="status-pill" id="statusText">Loading workbook…</div>
+        </div>
+      </aside>
+
+      <div class="main-panel">
+        <header class="topbar">
+          <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Open menu">☰</button>
+          <div class="topbar-copy">
+            <h2>PSA Search System</h2>
+            <p class="subtitle">Search PSOC and PSIC workbook records instantly.</p>
+          </div>
+        </header>
+
+        <main class="workspace">
+          <section class="summary-grid">
+            <div>
+              <strong id="fileName">Loading…</strong>
+              <span>Source file</span>
+            </div>
+            <div>
+              <strong id="resultCount">0</strong>
+              <span>Results shown</span>
+            </div>
+            <div>
+              <strong id="totalCount">0</strong>
+              <span>Total matches</span>
+            </div>
+          </section>
+
+          <section class="table-shell">
+            <div class="table-scroll">
+              <table id="resultsTable">
+                <thead></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <div id="userModal" class="modal hidden">
+      <div class="modal-backdrop" id="modalBackdrop"></div>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="userModalTitle">
+        <div class="modal-header">
+          <div>
+            <h2 id="userModalTitle">Create a local user</h2>
+            <p class="modal-description">Add a browser-only account for search access without administrator credentials.</p>
+          </div>
+          <button id="closeUserModal" class="close-button" type="button" aria-label="Close">×</button>
+        </div>
+        <form id="userForm" class="user-form" autocomplete="off">
+          <label>
+            New username
+            <input id="newUsername" type="text" required />
+          </label>
+          <label>
+            New password
+            <input id="newPassword" type="password" required />
+          </label>
+          <div class="modal-actions">
+            <button type="submit">Create user</button>
+            <button id="cancelUserModal" type="button" class="secondary">Cancel</button>
+          </div>
+          <p class="hint admin-hint">Users are stored locally in this browser only; refresh or clear storage and the account will be removed.</p>
+          <p class="error" id="userError"></p>
+          <p class="success" id="userSuccess"></p>
+        </form>
+      </div>
+    </div>
+
+    <div id="qrModal" class="modal hidden">
+      <div class="modal-backdrop" id="qrModalBackdrop"></div>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="qrModalTitle">
+        <div class="modal-header">
+          <div>
+            <h2 id="qrModalTitle">Scan a QR code</h2>
+            <p class="modal-description">Point your camera at a QR code. The decoded text fills the search box automatically.</p>
+          </div>
+          <button id="qrModalClose" class="close-button" type="button" aria-label="Close">×</button>
+        </div>
+        <div class="qr-scan-stage">
+          <video id="qrVideo" autoplay playsinline muted></video>
+          <div class="qr-scan-frame" aria-hidden="true"></div>
+          <canvas id="qrCanvas" class="hidden"></canvas>
+        </div>
+        <p class="hint qr-scan-status" id="qrScanStatus">Requesting camera access…</p>
+        <div class="modal-actions">
+          <button id="qrCancelScan" type="button" class="secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('service-worker.js').catch(() => {});
+        });
+      }
+    </script>
+  </body>
+</html>

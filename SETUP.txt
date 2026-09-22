@@ -1,0 +1,72 @@
+PSA Search System — Ready-to-Sync Folder
+==========================================
+
+This folder already contains your full PSA Search app (index.html, app.js,
+styles.css, data, logo, etc.) PLUS the auto-sync script. You don't need to
+copy anything into it — it's all here. Just do the one-time setup below,
+then every edit you make auto-uploads to GitHub.
+
+
+STEP 1 — Install Git
+---------------------
+Download and install from: https://git-scm.com/downloads
+(Click Next through the installer, defaults are fine.)
+
+
+STEP 2 — Install Python's watchdog package
+-------------------------------------------
+Open Command Prompt and run:
+    pip install watchdog
+
+
+STEP 3 — Create the GitHub repo (if you haven't already)
+-----------------------------------------------------------
+Go to github.com -> "+" -> New repository. Name it (e.g. psa-search-system),
+set it to Public, don't add a README. Click Create.
+
+
+STEP 4 — Connect this folder to that GitHub repo
+----------------------------------------------------
+Open Command Prompt, navigate into THIS folder, then run these commands
+one at a time (replace YOURNAME and YOURREPO with your actual GitHub
+username and repository name):
+
+    cd path\to\this\folder
+    git init
+    git remote add origin https://github.com/YOURNAME/YOURREPO.git
+    git add -A
+    git commit -m "Initial upload"
+    git branch -M main
+    git push -u origin main
+
+The first "git push" will pop up a browser window asking you to log in to
+GitHub. Log in once — Git remembers this afterward, so future pushes won't
+ask again.
+
+
+STEP 5 — Turn on GitHub Pages
+--------------------------------
+On GitHub, go to your repo -> Settings -> Pages. Under "Build and
+deployment", set Source to "Deploy from a branch", branch "main", folder
+"/ (root)", then Save. Your live URL appears there after a minute or two.
+
+
+STEP 6 — Run the watcher and just start editing
+----------------------------------------------------
+Double-click run_auto_sync.bat and leave that window open while you work.
+From now on, any time you add, edit, or delete a file in this folder, it
+automatically commits and pushes to GitHub within a few seconds — no more
+dragging files into the browser. Your live site updates itself.
+
+To stop watching, close the window or press Ctrl+C.
+
+
+Notes
+-----
+- Steps 1-5 are one-time only. After that, just run_auto_sync.bat whenever
+  you're about to make changes.
+- The watcher only runs while that window is open. Close it any time —
+  nothing breaks, it just stops auto-pushing until you reopen it.
+- Want the new zoom controls / other features re-generated as an .apk?
+  Same as before: paste your GitHub Pages URL into pwabuilder.com after
+  a push, and re-download the packaged APK.
