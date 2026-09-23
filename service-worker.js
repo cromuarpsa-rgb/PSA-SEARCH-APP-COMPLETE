@@ -1,4 +1,4 @@
-const CACHE_NAME = 'psa-search-v2';
+const CACHE_NAME = 'psa-search-v4';
 const APP_SHELL = [
   './',
   './index.html',

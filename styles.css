@@ -291,10 +291,33 @@ button {
 .topbar {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 16px;
   padding: 22px 32px;
   background: var(--surface);
   border-bottom: 1px solid var(--line);
+}
+
+.download-app-button {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent);
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: 0 18px;
+  min-height: 44px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.download-app-button:hover { filter: brightness(1.08); }
+.download-app-icon { font-size: 1rem; }
+
+@media (max-width: 900px) {
+  .download-app-button { margin-left: 0; }
 }
 
 .sidebar-toggle {
@@ -360,9 +383,88 @@ td { color: var(--ink); }
   }
   .sidebar.open { transform: translateX(0); }
   .sidebar-close { display: block; }
-  .sidebar-toggle { display: inline-flex; align-items: center; justify-content: center; }
+  .sidebar-toggle { display: none; }
   .topbar, .workspace { padding-left: 16px; padding-right: 16px; }
   .summary-grid { grid-template-columns: 1fr; }
+}
+
+/* ---------- Bottom nav (mobile app feel) ---------- */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 18;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.08);
+}
+.bottom-nav-item {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: transparent;
+  color: var(--muted);
+  min-height: 52px;
+  font-size: 0.72rem;
+  border-radius: 10px;
+  padding: 4px;
+}
+.bottom-nav-item:hover,
+.bottom-nav-item:active { background: var(--surface-alt); color: var(--accent); }
+.bottom-nav-icon { font-size: 1.25rem; line-height: 1; }
+
+@media (max-width: 900px) {
+  .bottom-nav { display: flex; }
+  .workspace { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* ---------- Card-style results (small phones) ---------- */
+@media (max-width: 640px) {
+  .table-scroll { overflow: visible; }
+  table { min-width: 0; width: 100%; }
+  thead { display: none; }
+  tbody { display: flex; flex-direction: column; gap: 10px; padding: 4px; }
+  tr {
+    display: block;
+    background: var(--surface-alt);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 10px 12px;
+  }
+  td {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 2px;
+    border-bottom: 1px solid var(--line);
+    text-align: right;
+  }
+  td:last-child { border-bottom: none; }
+  td::before {
+    content: attr(data-label);
+    flex: 0 0 42%;
+    text-align: left;
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  td.empty { display: block; text-align: center; }
+  td.empty::before { content: none; }
+}
+
+/* Safe-area padding when installed/standalone (behind notches, status bars) */
+:root { box-sizing: border-box; }
+.login-screen { padding-top: calc(32px + env(safe-area-inset-top, 0px)); padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
+.topbar { padding-top: calc(22px + env(safe-area-inset-top, 0px)); }
+@media (max-width: 900px) {
+  .sidebar { padding-top: env(safe-area-inset-top, 0px); }
 }
 
 /* ---------- Login screen ---------- */

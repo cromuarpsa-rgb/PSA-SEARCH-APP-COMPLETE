@@ -29,6 +29,9 @@ const themeToggle = document.getElementById('themeToggle');
 const themeToggleIcon = document.getElementById('themeToggleIcon');
 const themeToggleLabel = document.getElementById('themeToggleLabel');
 const qrScanButton = document.getElementById('qrScanButton');
+const bottomNavSearch = document.getElementById('bottomNavSearch');
+const bottomNavScan = document.getElementById('bottomNavScan');
+const bottomNavMenu = document.getElementById('bottomNavMenu');
 const qrModal = document.getElementById('qrModal');
 const qrModalBackdrop = document.getElementById('qrModalBackdrop');
 const qrModalClose = document.getElementById('qrModalClose');
@@ -342,7 +345,7 @@ function renderResults() {
   } else {
     tbody.innerHTML = rows.slice(0, 250).map((row) => {
       const values = columns.map((column) => formatCellValue(row[column] || ''));
-      return `<tr>${values.map((value) => `<td>${escapeHtml(value)}</td>`).join('')}</tr>`;
+      return `<tr>${values.map((value, index) => `<td data-label="${escapeHtml(columns[index])}">${escapeHtml(value)}</td>`).join('')}</tr>`;
     }).join('');
   }
 
@@ -422,6 +425,12 @@ clearButton.addEventListener('click', () => {
 });
 
 sidebarToggle.addEventListener('click', openSidebar);
+bottomNavMenu.addEventListener('click', openSidebar);
+bottomNavSearch.addEventListener('click', () => {
+  openSidebar();
+  setTimeout(() => searchInput.focus(), 250);
+});
+bottomNavScan.addEventListener('click', openQrScan);
 sidebarClose.addEventListener('click', closeSidebar);
 sidebarOverlay.addEventListener('click', closeSidebar);
 
