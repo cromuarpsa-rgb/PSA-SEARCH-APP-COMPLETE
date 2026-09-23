@@ -1,4 +1,4 @@
-const CACHE_NAME = 'psa-search-v4';
+const CACHE_NAME = 'psa-search-v5';
 const APP_SHELL = [
   './',
   './index.html',
@@ -34,6 +34,8 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  // Let external requests (e.g. the APK download on GitHub) go straight to the network
+  if (new URL(event.request.url).origin !== self.location.origin) return;
 
   event.respondWith(
     caches.match(event.request).then((cached) => {
