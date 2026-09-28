@@ -315,6 +315,7 @@ button {
 }
 .download-app-button:hover { filter: brightness(1.08); }
 .download-app-icon { font-size: 1rem; }
+html.in-app .download-app-button { display: none !important; }
 
 @media (max-width: 900px) {
   .download-app-button { margin-left: 0; }
