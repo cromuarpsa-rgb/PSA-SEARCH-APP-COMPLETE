@@ -6,13 +6,764 @@
     <title>PSA Search System</title>
     <link rel="manifest" href="manifest.webmanifest" />
     <meta name="theme-color" content="#0b3d91" />
-    <link rel="icon" href="logo/icon-192.png" />
-    <link rel="apple-touch-icon" href="logo/icon-192.png" />
+    <link rel="icon" href="logo/icon-192.png" sizes="192x192" type="image/png" />
+    <link rel="icon" href="logo/icon-512.png" sizes="512x512" type="image/png" />
+    <link rel="apple-touch-icon" href="logo/icon-192.png" sizes="192x192" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="PSA Search" />
-    <link rel="stylesheet" href="styles.css" />
+    <style>
+:root {
+  color-scheme: light;
+  --blue: #164e9f;
+  --blue-dark: #0e3b87;
+  --accent: #164e9f;
+  --red: #c3262e;
+  --gold: #f3b43f;
+  --success: #0b8d5b;
+  --ink: #132033;
+  --muted: #637083;
+  --line: #d8e0ea;
+  --bg: #eef3f8;
+  --surface: #ffffff;
+  --surface-alt: #f7f9fc;
+  --input-bg: #ffffff;
+  --sidebar-width: 272px;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --accent: #5b9bff;
+  --ink: #e8edf5;
+  --muted: #97a5bd;
+  --line: #263048;
+  --bg: #0c1322;
+  --surface: #16203a;
+  --surface-alt: #101a30;
+  --input-bg: #101a30;
+  --success: #38c793;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+button {
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: white;
+  padding: 0 16px;
+  min-height: 46px;
+  font: inherit;
+  cursor: pointer;
+}
+.hidden {
+  display: none !important;
+}
+
+/* ---------- App shell / sidebar layout ---------- */
+.app-shell {
+  min-height: 100vh;
+  background: var(--bg);
+  display: flex;
+  align-items: stretch;
+}
+
+.sidebar {
+  width: var(--sidebar-width);
+  flex: 0 0 var(--sidebar-width);
+  background: linear-gradient(180deg, var(--blue) 0%, var(--blue-dark) 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 22px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.sidebar-logo {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  border-radius: 10px;
+  background: white;
+  padding: 6px;
+  flex-shrink: 0;
+}
+
+.sidebar-brand h1 {
+  margin: 2px 0 0;
+  font-size: 1.15rem;
+}
+
+.sidebar-brand .eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.65rem;
+  opacity: 0.8;
+}
+
+.sidebar-close {
+  display: none;
+  margin-left: auto;
+  background: transparent;
+  min-height: auto;
+  padding: 4px 8px;
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.sidebar-nav {
+  flex: 1 1 auto;
+  padding: 8px 0 16px;
+}
+
+.sidebar-section {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.sidebar-section:last-child { border-bottom: none; }
+
+.sidebar-label {
+  margin: 0 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.12);
+  margin-bottom: 10px;
+}
+.search-box { min-height: 44px; }
+.search-box input {
+  border: none;
+  outline: none;
+  min-height: 40px;
+  width: 100%;
+  font: inherit;
+  background: transparent;
+  color: white;
+}
+.search-box input::placeholder { color: rgba(255, 255, 255, 0.65); }
+
+.sidebar-menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  min-height: 42px;
+  border-radius: 8px;
+  text-align: left;
+  padding: 0 14px;
+  margin-bottom: 8px;
+}
+.sidebar-menu-item:last-child { margin-bottom: 0; }
+.sidebar-menu-item:hover { background: rgba(255, 255, 255, 0.22); }
+.sidebar-menu-item.ghost {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+.sidebar-menu-item.ghost:hover { background: rgba(255, 255, 255, 0.12); }
+
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+.zoom-button {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  color: white;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 8px;
+}
+.zoom-button:hover { background: rgba(255, 255, 255, 0.22); }
+.zoom-button:disabled { opacity: 0.4; }
+.zoom-level {
+  flex: 1 1 auto;
+  text-align: center;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
+  min-width: 40px;
+}
+.zoom-reset {
+  flex: 0 0 auto;
+  height: 36px;
+  padding: 0 10px;
+  font-size: 12px;
+  color: white;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 8px;
+}
+.zoom-reset:hover { background: rgba(255, 255, 255, 0.12); }
+
+.sheet-nav { display: flex; flex-direction: column; gap: 6px; max-height: 46vh; overflow-y: auto; }
+.sheet-nav button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.88);
+  min-height: 38px;
+  border-radius: 8px;
+  text-align: left;
+  padding: 0 12px;
+  font-size: 0.92rem;
+}
+.sheet-nav button:hover { background: rgba(255, 255, 255, 0.12); }
+.sheet-nav button.active { background: white; color: var(--blue); font-weight: 700; }
+.sheet-nav button em {
+  font-style: normal;
+  font-size: 0.78rem;
+  opacity: 0.75;
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+.sheet-nav button.active em { background: rgba(22, 78, 159, 0.12); color: var(--blue); opacity: 1; }
+
+.sheet-empty {
+  padding: 14px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.75);
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.admin-section { border-bottom: none; }
+
+.sidebar-footer {
+  padding: 16px 20px 22px;
+  margin-top: auto;
+}
+
+.status-pill {
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 18, 33, 0.5);
+  z-index: 15;
+}
+.sidebar-overlay.visible { display: block; }
+
+/* ---------- Main content ---------- */
+.main-panel {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 22px 32px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.download-app-button {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent);
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: 0 18px;
+  min-height: 44px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.download-app-button:hover { filter: brightness(1.08); }
+.download-app-icon { font-size: 1rem; }
+html.in-app .download-app-button { display: none !important; }
+
+@media (max-width: 900px) {
+  .download-app-button { margin-left: 0; }
+}
+
+.sidebar-toggle {
+  display: none;
+  background: var(--surface);
+  color: var(--accent);
+  border: 1px solid var(--line);
+  min-height: 42px;
+  width: 42px;
+  padding: 0;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.topbar-copy h2 { margin: 0 0 4px; font-size: 1.35rem; color: var(--ink); }
+.topbar-copy .subtitle { margin: 0; color: var(--muted); }
+
+.workspace { padding: 24px 32px 40px; }
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.summary-grid > div {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.summary-grid strong { font-size: 1.05rem; color: var(--ink); }
+.summary-grid span { color: var(--muted); }
+
+.table-shell {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.table-scroll { overflow: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 700px; }
+th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { background: var(--surface-alt); color: var(--muted); font-size: 0.9rem; }
+td { color: var(--ink); }
+.empty { color: var(--muted); padding: 24px; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 20;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-close { display: block; }
+  .sidebar-toggle { display: none; }
+  .topbar, .workspace { padding-left: 16px; padding-right: 16px; }
+  .summary-grid { grid-template-columns: 1fr; }
+}
+
+/* ---------- Bottom nav (mobile app feel) ---------- */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 18;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.08);
+}
+.bottom-nav-item {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: transparent;
+  color: var(--muted);
+  min-height: 52px;
+  font-size: 0.72rem;
+  border-radius: 10px;
+  padding: 4px;
+}
+.bottom-nav-item:hover,
+.bottom-nav-item:active { background: var(--surface-alt); color: var(--accent); }
+.bottom-nav-icon { font-size: 1.25rem; line-height: 1; }
+
+@media (max-width: 900px) {
+  .bottom-nav { display: flex; }
+  .workspace { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* ---------- Floating action button (Scan), desktop & tablet ---------- */
+.fab {
+  display: none;
+  position: fixed;
+  right: 28px;
+  bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+  z-index: 19;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent);
+  color: #ffffff;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+.fab-icon { font-size: 1.4rem; line-height: 1; }
+.fab:hover { filter: brightness(1.08); box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28); }
+.fab:active { transform: scale(0.94); }
+.fab:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+@media (min-width: 901px) {
+  .fab { display: flex; }
+}
+
+/* ---------- Card-style results (small phones) ---------- */
+@media (max-width: 640px) {
+  .table-scroll { overflow: visible; }
+  table { min-width: 0; width: 100%; }
+  thead { display: none; }
+  tbody { display: flex; flex-direction: column; gap: 10px; padding: 4px; }
+  tr {
+    display: block;
+    background: var(--surface-alt);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 10px 12px;
+  }
+  td {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 2px;
+    border-bottom: 1px solid var(--line);
+    text-align: right;
+  }
+  td:last-child { border-bottom: none; }
+  td::before {
+    content: attr(data-label);
+    flex: 0 0 42%;
+    text-align: left;
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  td.empty { display: block; text-align: center; }
+  td.empty::before { content: none; }
+}
+
+/* Safe-area padding when installed/standalone (behind notches, status bars) */
+:root { box-sizing: border-box; }
+.login-screen { padding-top: calc(32px + env(safe-area-inset-top, 0px)); padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
+.topbar { padding-top: calc(22px + env(safe-area-inset-top, 0px)); }
+@media (max-width: 900px) {
+  .sidebar { padding-top: env(safe-area-inset-top, 0px); }
+}
+
+/* ---------- Login screen ---------- */
+.login-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+  color: white;
+}
+
+.login-panel {
+  width: min(620px, 100%);
+  background: var(--surface);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.16);
+  color: var(--ink);
+}
+
+.login-logo {
+  width: 84px;
+  height: 84px;
+  border-radius: 18px;
+  object-fit: contain;
+  margin-bottom: 20px;
+}
+
+.login-copy .eyebrow {
+  color: var(--accent);
+  margin: 0 0 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.75rem;
+}
+
+.login-panel h1 {
+  margin: 0 0 10px;
+  font-size: 2rem;
+}
+
+.login-panel .subtitle {
+  margin: 0 0 24px;
+  color: var(--muted);
+}
+
+.login-form {
+  display: grid;
+  gap: 16px;
+}
+
+.login-form label {
+  display: grid;
+  gap: 8px;
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.login-form input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font: inherit;
+  background: var(--input-bg);
+  color: var(--ink);
+}
+
+.login-form button {
+  min-height: 50px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.login-form .hint {
+  margin: 0;
+  color: var(--muted);
+}
+
+.login-form .error {
+  margin: 0;
+  color: var(--red);
+  min-height: 1.2em;
+}
+
+/* ---------- Modal ---------- */
+.modal {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 1000;
+  padding: 16px;
+}
+.modal.hidden { display: none; }
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.modal-card {
+  position: relative;
+  width: min(560px, 100%);
+  background: var(--surface);
+  border-radius: 28px;
+  padding: 32px;
+  box-shadow: 0 32px 90px rgba(15, 23, 42, 0.3);
+  z-index: 1;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: var(--ink);
+}
+
+.modal-description {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.close-button {
+  background: transparent;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.user-form {
+  display: grid;
+  gap: 18px;
+}
+
+.user-form label {
+  display: grid;
+  gap: 10px;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.user-form input {
+  width: 100%;
+  min-height: 50px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  font: inherit;
+  background: var(--input-bg);
+  color: var(--ink);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.user-form input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(22, 78, 159, 0.12);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.modal-actions button { flex: 1 1 auto; }
+
+.user-form .hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.user-form button {
+  min-height: 48px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.secondary {
+  background: var(--surface);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+.secondary:hover { background: var(--surface-alt); }
+
+.admin-hint {
+  margin: 0;
+  color: var(--muted);
+}
+
+.error, .success {
+  margin: 0;
+  font-size: 0.95rem;
+}
+.error { color: var(--red); }
+.success { color: var(--success); }
+
+/* ---------- QR scanner ---------- */
+.qr-scan-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: #05070c;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.qr-scan-stage video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.qr-scan-frame {
+  position: absolute;
+  inset: 14% 22%;
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  border-radius: 16px;
+  box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+.qr-scan-status {
+  margin-top: 14px;
+  text-align: center;
+}
+
+#qrCanvas { display: none; }
+
+    </style>
     <script>
       // Hide the "Download App" button when already running inside the installed app
       (function () {
@@ -154,6 +905,10 @@
           </section>
         </main>
 
+        <button type="button" id="fabScan" class="fab" aria-label="Scan QR code">
+          <span class="fab-icon">📷</span>
+        </button>
+
         <nav class="bottom-nav" id="bottomNav">
           <button type="button" id="bottomNavSearch" class="bottom-nav-item">
             <span class="bottom-nav-icon">🔍</span>
@@ -223,7 +978,499 @@
       </div>
     </div>
 
-    <script src="app.js"></script>
+    <script>
+const searchInput = document.getElementById('searchInput');
+const clearButton = document.getElementById('clearButton');
+const table = document.getElementById('resultsTable');
+const statusText = document.getElementById('statusText');
+const fileName = document.getElementById('fileName');
+const resultCount = document.getElementById('resultCount');
+const totalCount = document.getElementById('totalCount');
+const sheetNav = document.getElementById('sheetNav');
+const loginForm = document.getElementById('loginForm');
+const loginError = document.getElementById('loginError');
+const loginScreen = document.getElementById('loginScreen');
+const appShell = document.getElementById('appShell');
+const adminSection = document.getElementById('adminSection');
+const adminAddUser = document.getElementById('adminAddUser');
+const userModal = document.getElementById('userModal');
+const modalBackdrop = document.getElementById('modalBackdrop');
+const closeUserModal = document.getElementById('closeUserModal');
+const cancelUserModal = document.getElementById('cancelUserModal');
+const userForm = document.getElementById('userForm');
+const newUsername = document.getElementById('newUsername');
+const newPassword = document.getElementById('newPassword');
+const userError = document.getElementById('userError');
+const userSuccess = document.getElementById('userSuccess');
+const sidebar = document.getElementById('sidebar');
+const sidebarToggle = document.getElementById('sidebarToggle');
+const sidebarClose = document.getElementById('sidebarClose');
+const sidebarOverlay = document.getElementById('sidebarOverlay');
+const themeToggle = document.getElementById('themeToggle');
+const themeToggleIcon = document.getElementById('themeToggleIcon');
+const themeToggleLabel = document.getElementById('themeToggleLabel');
+const qrScanButton = document.getElementById('qrScanButton');
+const fabScan = document.getElementById('fabScan');
+const bottomNavSearch = document.getElementById('bottomNavSearch');
+const bottomNavScan = document.getElementById('bottomNavScan');
+const bottomNavMenu = document.getElementById('bottomNavMenu');
+const qrModal = document.getElementById('qrModal');
+const qrModalBackdrop = document.getElementById('qrModalBackdrop');
+const qrModalClose = document.getElementById('qrModalClose');
+const qrCancelScan = document.getElementById('qrCancelScan');
+const qrVideo = document.getElementById('qrVideo');
+const qrCanvas = document.getElementById('qrCanvas');
+const qrScanStatus = document.getElementById('qrScanStatus');
+const zoomInButton = document.getElementById('zoomInButton');
+const zoomOutButton = document.getElementById('zoomOutButton');
+const zoomResetButton = document.getElementById('zoomResetButton');
+const zoomLevelLabel = document.getElementById('zoomLevelLabel');
+
+let workbook = null;
+let activeSheet = 'all';
+let loaded = false;
+let currentUser = null;
+let qrStream = null;
+let qrAnimationFrame = null;
+let qrBarcodeDetector = null;
+let jsQRLoadPromise = null;
+
+const AUTH_USERNAME = 'admin';
+const AUTH_PASSWORD = 'admin123';
+const LOCAL_USERS_KEY = 'psa_search_users';
+const THEME_KEY = 'psa_search_theme';
+const ZOOM_KEY = 'psa_search_zoom';
+const ZOOM_MIN = 80;
+const ZOOM_MAX = 160;
+const ZOOM_STEP = 10;
+const JSQR_SRC = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function formatCellValue(value) {
+  if (value === null || value === undefined || value === '') return '';
+  const str = String(value).trim();
+  if (/^-?\d+(\.\d+)?$/.test(str)) {
+    const num = Number(str);
+    if (!Number.isNaN(num)) {
+      return String(Math.round(num));
+    }
+  }
+  return value;
+}
+
+function showApp() {
+  loginScreen.classList.add('hidden');
+  appShell.classList.remove('hidden');
+}
+
+function showLogin(message = '') {
+  loginScreen.classList.remove('hidden');
+  appShell.classList.add('hidden');
+  loginError.textContent = message;
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const isDark = theme === 'dark';
+  themeToggleIcon.textContent = isDark ? '☀️' : '🌙';
+  themeToggleLabel.textContent = isDark ? 'Light mode' : 'Dark mode';
+  themeToggle.setAttribute('aria-pressed', String(isDark));
+}
+
+function initTheme() {
+  const stored = localStorage.getItem(THEME_KEY);
+  if (stored === 'dark' || stored === 'light') {
+    applyTheme(stored);
+    return;
+  }
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(prefersDark ? 'dark' : 'light');
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  const next = current === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  localStorage.setItem(THEME_KEY, next);
+}
+
+function applyZoom(level) {
+  const clamped = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, level));
+  appShell.style.zoom = clamped / 100;
+  zoomLevelLabel.textContent = `${clamped}%`;
+  zoomOutButton.disabled = clamped <= ZOOM_MIN;
+  zoomInButton.disabled = clamped >= ZOOM_MAX;
+  localStorage.setItem(ZOOM_KEY, String(clamped));
+  return clamped;
+}
+
+function initZoom() {
+  const stored = parseInt(localStorage.getItem(ZOOM_KEY), 10);
+  applyZoom(Number.isFinite(stored) ? stored : 100);
+}
+
+function currentZoom() {
+  const stored = parseInt(localStorage.getItem(ZOOM_KEY), 10);
+  return Number.isFinite(stored) ? stored : 100;
+}
+
+function zoomIn() {
+  applyZoom(currentZoom() + ZOOM_STEP);
+}
+
+function zoomOut() {
+  applyZoom(currentZoom() - ZOOM_STEP);
+}
+
+function resetZoom() {
+  applyZoom(100);
+}
+
+function openSidebar() {
+  sidebar.classList.add('open');
+  sidebarOverlay.classList.add('visible');
+}
+
+function closeSidebar() {
+  sidebar.classList.remove('open');
+  sidebarOverlay.classList.remove('visible');
+}
+
+function loadJsQR() {
+  if (window.jsQR) return Promise.resolve();
+  if (jsQRLoadPromise) return jsQRLoadPromise;
+  jsQRLoadPromise = new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = JSQR_SRC;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error('Could not load the QR decoder. Check your internet connection and try again.'));
+    document.head.appendChild(script);
+  });
+  return jsQRLoadPromise;
+}
+
+function handleQrResult(text) {
+  stopQrScan();
+  searchInput.value = text;
+  renderResults();
+  statusText.textContent = 'Search updated from scanned QR code.';
+}
+
+function detectWithNativeDetector() {
+  if (!qrStream) return;
+  qrBarcodeDetector.detect(qrVideo)
+    .then((codes) => {
+      if (codes && codes.length > 0 && codes[0].rawValue) {
+        handleQrResult(codes[0].rawValue);
+        return;
+      }
+      qrAnimationFrame = requestAnimationFrame(detectWithNativeDetector);
+    })
+    .catch(() => {
+      qrAnimationFrame = requestAnimationFrame(detectWithNativeDetector);
+    });
+}
+
+function detectWithJsQR() {
+  if (!qrStream) return;
+  const context = qrCanvas.getContext('2d');
+  if (qrVideo.readyState === qrVideo.HAVE_ENOUGH_DATA && qrVideo.videoWidth) {
+    qrCanvas.width = qrVideo.videoWidth;
+    qrCanvas.height = qrVideo.videoHeight;
+    context.drawImage(qrVideo, 0, 0, qrCanvas.width, qrCanvas.height);
+    const imageData = context.getImageData(0, 0, qrCanvas.width, qrCanvas.height);
+    const code = window.jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+    if (code && code.data) {
+      handleQrResult(code.data);
+      return;
+    }
+  }
+  qrAnimationFrame = requestAnimationFrame(detectWithJsQR);
+}
+
+async function startQrDetection() {
+  if ('BarcodeDetector' in window) {
+    try {
+      const supported = await window.BarcodeDetector.getSupportedFormats();
+      if (supported.includes('qr_code')) {
+        qrBarcodeDetector = new window.BarcodeDetector({ formats: ['qr_code'] });
+        qrScanStatus.textContent = 'Point your camera at a QR code.';
+        detectWithNativeDetector();
+        return;
+      }
+    } catch {
+      // Fall through to the jsQR fallback below.
+    }
+  }
+
+  try {
+    qrScanStatus.textContent = 'Loading QR decoder…';
+    await loadJsQR();
+    qrScanStatus.textContent = 'Point your camera at a QR code.';
+    detectWithJsQR();
+  } catch (error) {
+    qrScanStatus.textContent = error.message;
+  }
+}
+
+async function openQrScan() {
+  closeSidebar();
+  qrModal.classList.remove('hidden');
+  qrScanStatus.textContent = 'Requesting camera access…';
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    qrScanStatus.textContent = 'Camera access is not supported in this browser.';
+    return;
+  }
+
+  try {
+    qrStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    qrVideo.srcObject = qrStream;
+    await qrVideo.play();
+    startQrDetection();
+  } catch (error) {
+    qrScanStatus.textContent = 'Camera unavailable: ' + error.message;
+  }
+}
+
+function stopQrScan() {
+  if (qrAnimationFrame) {
+    cancelAnimationFrame(qrAnimationFrame);
+    qrAnimationFrame = null;
+  }
+  if (qrStream) {
+    qrStream.getTracks().forEach((track) => track.stop());
+    qrStream = null;
+  }
+  qrVideo.pause();
+  qrVideo.srcObject = null;
+  qrBarcodeDetector = null;
+  qrModal.classList.add('hidden');
+}
+
+function openUserModal() {
+  userModal.classList.remove('hidden');
+  userError.textContent = '';
+  userSuccess.textContent = '';
+  newUsername.value = '';
+  newPassword.value = '';
+}
+
+function closeUserModalDialog() {
+  userModal.classList.add('hidden');
+}
+
+function renderSheets() {
+  const sheets = workbook?.sheets || [];
+
+  if (sheets.length === 0) {
+    sheetNav.innerHTML = '<div class="sheet-empty">No workbook sheets available.</div>';
+    return;
+  }
+
+  sheetNav.innerHTML = ['<button type="button" data-sheet="all" class="' + (activeSheet === 'all' ? 'active' : '') + '"><span>All sheets</span></button>']
+    .concat(sheets.map((sheet) => `<button type="button" data-sheet="${escapeHtml(sheet.name)}" class="${activeSheet === sheet.name ? 'active' : ''}"><span>${escapeHtml(sheet.name)}</span><em>${sheet.count}</em></button>`))
+    .join('');
+  sheetNav.querySelectorAll('button').forEach((button) => {
+    button.addEventListener('click', () => {
+      activeSheet = button.dataset.sheet;
+      renderSheets();
+      renderResults();
+      closeSidebar();
+    });
+  });
+}
+
+function filterRows() {
+  const term = searchInput.value.trim().toLowerCase();
+  const sheets = workbook?.sheets || [];
+  const selectedSheets = activeSheet === 'all' ? sheets : sheets.filter((sheet) => sheet.name === activeSheet);
+
+  let columns = [];
+  let rows = [];
+  let totalMatches = 0;
+
+  for (const sheet of selectedSheets) {
+    const sheetColumns = sheet.columns || [];
+    sheetColumns.forEach((column) => {
+      if (!columns.includes(column)) columns.push(column);
+    });
+    const matchedRows = (sheet.rows || []).filter((row) => {
+      if (!term) return true;
+      const haystack = Object.values(row).join(' ').toLowerCase();
+      return haystack.includes(term);
+    });
+    totalMatches += matchedRows.length;
+    rows.push(...matchedRows.map((row) => ({ sheet: sheet.name, ...row })));
+  }
+
+  return { columns, rows, totalMatches };
+}
+
+function renderResults() {
+  const { columns, rows, totalMatches } = filterRows();
+  const thead = table.querySelector('thead');
+  const tbody = table.querySelector('tbody');
+
+  thead.innerHTML = columns.length ? `<tr>${columns.map((column) => `<th>${escapeHtml(column)}</th>`).join('')}</tr>` : '';
+
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td class="empty" colspan="${Math.max(columns.length, 1)}">No matching records found.</td></tr>`;
+  } else {
+    tbody.innerHTML = rows.slice(0, 250).map((row) => {
+      const values = columns.map((column) => formatCellValue(row[column] || ''));
+      return `<tr>${values.map((value, index) => `<td data-label="${escapeHtml(columns[index])}">${escapeHtml(value)}</td>`).join('')}</tr>`;
+    }).join('');
+  }
+
+  resultCount.textContent = String(Math.min(rows.length, 250));
+  totalCount.textContent = String(totalMatches);
+}
+
+function loadStoredUsers() {
+  try {
+    const raw = localStorage.getItem(LOCAL_USERS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveStoredUsers(users) {
+  localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(users));
+}
+
+async function loadWorkbook() {
+  statusText.textContent = 'Loading workbook…';
+  try {
+    const response = await fetch('data/psa-data.json');
+    if (!response.ok) throw new Error('Unable to load workbook data.');
+    workbook = await response.json();
+    fileName.textContent = workbook.file || 'Unknown workbook';
+    if (!workbook.sheets || workbook.sheets.length === 0) {
+      statusText.textContent = 'Workbook loaded, but no sheets were found. Run the export script to refresh data.';
+      table.querySelector('tbody').innerHTML = `<tr><td class="empty">No sheets available in workbook data.</td></tr>`;
+      renderSheets();
+      resultCount.textContent = '0';
+      totalCount.textContent = '0';
+      loaded = true;
+      return;
+    }
+    statusText.textContent = `Loaded ${workbook.sheets.length} sheet(s)`;
+    renderSheets();
+    renderResults();
+    loaded = true;
+  } catch (error) {
+    statusText.textContent = error.message;
+    fileName.textContent = 'Workbook unavailable';
+    resultCount.textContent = '0';
+    totalCount.textContent = '0';
+    table.querySelector('tbody').innerHTML = `<tr><td class="empty">${escapeHtml(error.message)}</td></tr>`;
+  }
+}
+
+loginForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  const users = loadStoredUsers();
+
+  const isAdmin = username === AUTH_USERNAME && password === AUTH_PASSWORD;
+  const isRegularUser = users[username] && users[username] === password;
+
+  if (isAdmin || isRegularUser) {
+    currentUser = username;
+    loginError.textContent = '';
+    showApp();
+    adminSection.classList.toggle('hidden', !isAdmin);
+    if (!loaded) loadWorkbook();
+    return;
+  }
+
+  showLogin('Invalid username or password.');
+});
+
+searchInput.addEventListener('input', renderResults);
+clearButton.addEventListener('click', () => {
+  searchInput.value = '';
+  activeSheet = 'all';
+  renderSheets();
+  renderResults();
+});
+
+sidebarToggle.addEventListener('click', openSidebar);
+bottomNavMenu.addEventListener('click', openSidebar);
+bottomNavSearch.addEventListener('click', () => {
+  openSidebar();
+  setTimeout(() => searchInput.focus(), 250);
+});
+bottomNavScan.addEventListener('click', openQrScan);
+sidebarClose.addEventListener('click', closeSidebar);
+sidebarOverlay.addEventListener('click', closeSidebar);
+
+themeToggle.addEventListener('click', toggleTheme);
+zoomInButton.addEventListener('click', zoomIn);
+zoomOutButton.addEventListener('click', zoomOut);
+zoomResetButton.addEventListener('click', resetZoom);
+
+qrScanButton.addEventListener('click', openQrScan);
+fabScan.addEventListener('click', openQrScan);
+qrModalClose.addEventListener('click', stopQrScan);
+qrCancelScan.addEventListener('click', stopQrScan);
+qrModalBackdrop.addEventListener('click', stopQrScan);
+
+adminAddUser.addEventListener('click', () => {
+  closeSidebar();
+  openUserModal();
+});
+
+closeUserModal.addEventListener('click', closeUserModalDialog);
+cancelUserModal.addEventListener('click', closeUserModalDialog);
+modalBackdrop.addEventListener('click', closeUserModalDialog);
+
+userForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  userError.textContent = '';
+  userSuccess.textContent = '';
+
+  const username = newUsername.value.trim();
+  const password = newPassword.value;
+
+  if (!username || !password) {
+    userError.textContent = 'Both username and password are required.';
+    return;
+  }
+  if (username === AUTH_USERNAME) {
+    userError.textContent = 'Cannot create another admin user.';
+    return;
+  }
+
+  const users = loadStoredUsers();
+  if (users[username]) {
+    userError.textContent = 'This username already exists.';
+    return;
+  }
+
+  users[username] = password;
+  saveStoredUsers(users);
+  userSuccess.textContent = `User "${username}" created successfully.`;
+  newUsername.value = '';
+  newPassword.value = '';
+});
+
+initTheme();
+initZoom();
+showLogin();
+
+    </script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
